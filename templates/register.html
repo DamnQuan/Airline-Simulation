@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航司模拟经营 - 注册</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-left">
+            <div class="auth-header">
+                <i class="fas fa-plane-departure"></i>
+                <h1>航司模拟经营</h1>
+                <p>开启您的航空帝国之旅</p>
+            </div>
+            
+            <div class="auth-features">
+                <div class="feature">
+                    <i class="fas fa-globe"></i>
+                    <span>全球航线网络</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-cogs"></i>
+                    <span>深度经营系统</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-trophy"></i>
+                    <span>成为航空巨头</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="auth-right">
+            <div class="auth-form-container">
+                <h2>创建账户</h2>
+                <p class="auth-subtitle">加入我们，建立您的航空公司</p>
+                
+                {% if error %}
+                <div class="auth-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                <form method="POST" class="auth-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="username">
+                                <i class="fas fa-user"></i>
+                                用户名
+                            </label>
+                            <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">
+                                <i class="fas fa-lock"></i>
+                                密码
+                            </label>
+                            <input type="password" id="password" name="password" placeholder="请输入密码" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="airline_name">
+                                <i class="fas fa-building"></i>
+                                航司名称
+                            </label>
+                            <input type="text" id="airline_name" name="airline_name" placeholder="如：中国国际航空" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="airline_code">
+                                <i class="fas fa-code"></i>
+                                三字代码
+                            </label>
+                            <input type="text" id="airline_code" name="airline_code" pattern="[A-Z]{3}" placeholder="如：CCA" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="headquarters">
+                            <i class="fas fa-map-marker-alt"></i>
+                            航司总部
+                        </label>
+                        <input type="text" id="headquarters" name="headquarters" placeholder="如：北京" required>
+                    </div>
+                    
+                    <button type="submit" class="auth-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        创建账户
+                    </button>
+                </form>
+                
+                <p class="auth-link">
+                    已有账户？
+                    <a href="{{ url_for('login') }}">立即登录</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 三字代码自动转大写
+        document.getElementById('airline_code').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>

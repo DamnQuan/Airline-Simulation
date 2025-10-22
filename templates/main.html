@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航司模拟经营 - 主界面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1>{{ airline_name }} ({{ airline_code }})</h1>
+            <ul>
+                <li><a href="{{ url_for('main') }}">主页</a></li>
+                <li><a href="{{ url_for('flight_operations') }}">航班运营</a></li>
+                <li><a href="{{ url_for('buy_aircraft') }}">购买飞机</a></li>
+                <li><a href="{{ url_for('profile') }}">个人中心</a></li>
+                {% if session.get('role') == 'admin' %}
+                <li><a href="{{ url_for('admin_panel') }}">管理员面板</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h2>航司状态</h2>
+        
+        <div class="status-grid">
+            <div class="status-card">
+                <h3>金钱</h3>
+                <p class="money">¥{{ "{:,.0f}".format(money) }}</p>
+            </div>
+            
+            <div class="status-card">
+                <h3>安全值</h3>
+                <p class="safety">{{ safety }}/10</p>
+                <div class="progress-bar">
+                    <div class="progress" style="width: {{ safety * 10 }}%;"></div>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <h3>舒适度值</h3>
+                <p class="comfort">{{ comfort }}/10</p>
+                <div class="progress-bar">
+                    <div class="progress" style="width: {{ comfort * 10 }}%;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-actions">
+            <h3>快速操作</h3>
+            <div class="action-buttons">
+                <a href="{{ url_for('flight_operations') }}" class="btn flight">运营航班</a>
+                <a href="{{ url_for('buy_aircraft') }}" class="btn buy">购买飞机</a>
+                <a href="{{ url_for('profile') }}" class="btn fleet">查看机队</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

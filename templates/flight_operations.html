@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航班运营</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1><i class="fas fa-plane"></i> 航司模拟经营</h1>
+            <ul>
+                <li><a href="{{ url_for('main') }}"><i class="fas fa-home"></i> 主页</a></li>
+                <li><a href="{{ url_for('flight_operations') }}"><i class="fas fa-route"></i> 航班运营</a></li>
+                <li><a href="{{ url_for('buy_aircraft') }}"><i class="fas fa-shopping-cart"></i> 购买飞机</a></li>
+                <li><a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> 个人中心</a></li>
+                {% if session.get('role') == 'admin' %}
+                <li><a href="{{ url_for('admin_panel') }}"><i class="fas fa-cog"></i> 管理员面板</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> 退出</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="page-header">
+            <h2><i class="fas fa-route"></i> 航班运营</h2>
+            <p>规划您的航线，开启新的旅程</p>
+        </div>
+        
+        <div class="flight-form-container">
+            <form id="flightForm" class="modern-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="flight_number">
+                            <i class="fas fa-hashtag"></i>
+                            航班号
+                        </label>
+                        <input type="text" id="flight_number" name="flight_number" pattern="[A-Z]{3}\d{3,4}" placeholder="如：CCA123" required>
+                        <small>格式：航空公司代码 + 数字</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="departure">
+                            <i class="fas fa-plane-departure"></i>
+                            起点机场ICAO
+                        </label>
+                        <input type="text" id="departure" name="departure" pattern="[A-Z]{4}" placeholder="如：ZBAA" required>
+                        <small>四位大写字母代码</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="arrival">
+                            <i class="fas fa-plane-arrival"></i>
+                            终点机场ICAO
+                        </label>
+                        <input type="text" id="arrival" name="arrival" pattern="[A-Z]{4}" placeholder="如：ZGGG" required>
+                        <small>四位大写字母代码</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="aircraft">
+                            <i class="fas fa-jet-fighter"></i>
+                            选择飞机
+                        </label>
+                        <select id="aircraft" name="aircraft" required>
+                            <option value="">请选择飞机</option>
+                            {% for aircraft in aircrafts %}
+                            <option value="{{ aircraft[0] }}">{{ aircraft[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ticket_price">
+                            <i class="fas fa-ticket-alt"></i>
+                            单个人票价（元）
+                        </label>
+                        <input type="number" id="ticket_price" name="ticket_price" min="1" max="1000" placeholder="建议：100-500元" required>
+                        <small>票价影响乘客数量</small>
+                    </div>
+                </div>
+                
+                <div class="price-hint">
+                    <h4><i class="fas fa-info-circle"></i> 票价策略提示</h4>
+                    <div class="hint-grid">
+                        <div class="hint-item">
+                            <span class="price-range">¥1-200</span>
+                            <span class="hint-text">高吸引力（1.2倍）</span>
+                        </div>
+                        <div class="hint-item">
+                            <span class="price-range">¥201-300</span>
+                            <span class="hint-text">标准价格（0.8倍）</span>
+                        </div>
+                        <div class="hint-item">
+                            <span class="price-range">¥301-500</span>
+                            <span class="hint-text">较高价格（0.5倍）</span>
+                        </div>
+                        <div class="hint-item">
+                            <span class="price-range">¥500+</span>
+                            <span class="hint-text">高端定价（0.2倍）</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="flight-submit-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    开始飞行
+                </button>
+            </form>
+        </div>
+        
+        <!-- 答题模态框 -->
+        <div id="questionsModal" class="modal">
+            <div class="modal-content questions-modal">
+                <div class="modal-header">
+                    <h3><i class="fas fa-question-circle"></i> 航空知识测试</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p class="test-instruction">请回答以下5个问题，答对3个及以上即可成功执行航班：</p>
+                    <div id="questionsContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <div class="progress-bar">
+                        <div id="answerProgress" class="progress"></div>
+                    </div>
+                    <button id="submitAnswers" class="btn-submit">
+                        <i class="fas fa-check"></i>
+                        提交答案
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 结果模态框 -->
+        <div id="resultModal" class="modal">
+            <div class="modal-content result-modal">
+                <div class="modal-header">
+                    <h3 id="resultTitle">飞行结果</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="resultIcon"></div>
+                    <p id="resultMessage"></p>
+                    <div id="flightDetails"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="closeResult" class="btn-confirm">
+                        <i class="fas fa-check"></i>
+                        确定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

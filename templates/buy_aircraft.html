@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购买飞机</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1>航司模拟经营</h1>
+            <ul>
+                <li><a href="{{ url_for('main') }}">主页</a></li>
+                <li><a href="{{ url_for('flight_operations') }}">航班运营</a></li>
+                <li><a href="{{ url_for('buy_aircraft') }}">购买飞机</a></li>
+                <li><a href="{{ url_for('profile') }}">个人中心</a></li>
+                {% if session.get('role') == 'admin' %}
+                <li><a href="{{ url_for('admin_panel') }}">管理员面板</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h2>购买飞机</h2>
+        
+        <div class="aircraft-section">
+            <h3>窄体机</h3>
+            <div class="aircraft-grid">
+                {% for aircraft, data in narrow_body.items() %}
+                <div class="aircraft-card">
+                    <h4>{{ aircraft }}</h4>
+                    <p>价格：¥{{ "{:,.0f}".format(data.price) }}</p>
+                    <p>最大载客量：{{ data.capacity }}人</p>
+                    <button onclick="purchaseAircraft('{{ aircraft }}', false)">购买</button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="aircraft-section">
+            <h3>宽体机</h3>
+            <div class="aircraft-grid">
+                {% for aircraft, data in wide_body.items() %}
+                <div class="aircraft-card">
+                    <h4>{{ aircraft }}</h4>
+                    <p>价格：¥{{ "{:,.0f}".format(data.price) }}</p>
+                    <p>最大载客量：{{ data.capacity }}人</p>
+                    <button onclick="purchaseAircraft('{{ aircraft }}', true)">购买</button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="accessories-section">
+            <h3>舒适度配件</h3>
+            <div class="accessories-grid">
+                <div class="accessory-card">
+                    <h4>电视</h4>
+                    <p>舒适度 +2</p>
+                    <p>价格：¥50,000,000</p>
+                    <button onclick="buyAccessory('电视')">购买</button>
+                </div>
+                <div class="accessory-card">
+                    <h4>机载WiFi</h4>
+                    <p>舒适度 +5</p>
+                    <p>价格：¥100,000,000</p>
+                    <button onclick="buyAccessory('机载WiFi')">购买</button>
+                </div>
+                <div class="accessory-card">
+                    <h4>真皮座椅</h4>
+                    <p>舒适度 +2</p>
+                    <p>价格：¥50,000,000</p>
+                    <button onclick="buyAccessory('真皮座椅')">购买</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function purchaseAircraft(aircraftType, isWideBody) {
+            fetch('/purchase_aircraft', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    aircraft_type: aircraftType,
+                    is_wide_body: isWideBody
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        }
+        
+        function buyAccessory(accessoryType) {
+            fetch('/buy_accessory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    accessory_type: accessoryType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

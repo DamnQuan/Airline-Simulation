@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1><i class="fas fa-plane"></i> 航司模拟经营</h1>
+            <ul>
+                <li><a href="{{ url_for('main') }}"><i class="fas fa-home"></i> 主页</a></li>
+                <li><a href="{{ url_for('flight_operations') }}"><i class="fas fa-route"></i> 航班运营</a></li>
+                <li><a href="{{ url_for('buy_aircraft') }}"><i class="fas fa-shopping-cart"></i> 购买飞机</a></li>
+                <li><a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> 个人中心</a></li>
+                {% if session.get('role') == 'admin' %}
+                <li><a href="{{ url_for('admin_panel') }}"><i class="fas fa-cog"></i> 管理员面板</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> 退出</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="page-header">
+            <h2><i class="fas fa-user"></i> 个人中心</h2>
+            <p>管理您的个人信息和机队</p>
+        </div>
+        
+        <div class="profile-grid">
+            <div class="profile-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-circle"></i> 用户信息</h3>
+                </div>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">用户名：</span>
+                        <span class="info-value">{{ user_info[0] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">航司名称：</span>
+                        <span class="info-value">{{ user_info[1] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">三字代码：</span>
+                        <span class="info-value">{{ user_info[2] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">总部：</span>
+                        <span class="info-value">{{ user_info[3] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">金钱：</span>
+                        <span class="info-value money">¥{{ "{:,.0f}".format(user_info[4]) }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">安全值：</span>
+                        <span class="info-value">{{ user_info[5] }}/10</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">舒适度：</span>
+                        <span class="info-value">{{ user_info[6] }}/10</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">权限等级：</span>
+                        <span class="info-value">
+                            <span class="role-badge {{ user_info[7] }}">{{ user_info[7] }}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-jet-fighter"></i> 我的机队</h3>
+                </div>
+                {% if aircrafts %}
+                <div class="aircraft-list">
+                    {% for aircraft in aircrafts %}
+                    <div class="aircraft-item">
+                        <div class="aircraft-info">
+                            <h4>{{ aircraft[1] }}</h4>
+                            <p>最大载客量：{{ aircraft[2] }}人</p>
+                            <p>购买价格：¥{{ "{:,.0f}".format(aircraft[3]) }}</p>
+                            <p class="sell-price">出售价格：¥{{ "{:,.0f}".format(aircraft[4] * 0.5) }}</p>
+                        </div>
+                        <button class="sell-btn" onclick="sellAircraft({{ aircraft[0] }}, '{{ aircraft[1] }}')">
+                            <i class="fas fa-dollar-sign"></i>
+                            出售
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-plane-slash"></i>
+                    <p>您还没有购买任何飞机</p>
+                    <a href="{{ url_for('buy_aircraft') }}" class="btn-primary">
+                        <i class="fas fa-shopping-cart"></i>
+                        购买飞机
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="profile-card">
+            <div class="card-header">
+                <h3><i class="fas fa-cog"></i> 已购买配件</h3>
+            </div>
+            {% if accessories %}
+            <div class="accessories-list">
+                {% for accessory in accessories %}
+                <div class="accessory-item">
+                    <div class="accessory-icon">
+                        <i class="fas fa-tv"></i>
+                    </div>
+                    <div class="accessory-info">
+                        <h4>{{ accessory[0] }}</h4>
+                        <p>舒适度加成：+{{ accessory[1] }}</p>
+                        <p>购买价格：¥{{ "{:,.0f}".format(accessory[2]) }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-cog"></i>
+                <p>您还没有购买任何配件</p>
+                <a href="{{ url_for('buy_aircraft') }}" class="btn-primary">
+                    <i class="fas fa-shopping-cart"></i>
+                    购买配件
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 出售确认模态框 -->
+    <div id="sellModal" class="modal">
+        <div class="modal-content sell-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> 确认出售</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="sellMessage"></p>
+                <div class="sell-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <span>出售后无法撤销，请谨慎操作</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmSell" class="btn-sell-confirm">
+                    <i class="fas fa-check"></i>
+                    确认出售
+                </button>
+                <button id="cancelSell" class="btn-cancel">
+                    <i class="fas fa-times"></i>
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let sellAircraftId = null;
+        let sellAircraftName = null;
+        
+        function sellAircraft(aircraftId, aircraftName) {
+            sellAircraftId = aircraftId;
+            sellAircraftName = aircraftName;
+            
+            // 获取出售价格
+            fetch('/get_aircraft_info/' + aircraftId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const sellPrice = data.purchase_price * 0.5;
+                        document.getElementById('sellMessage').innerHTML = 
+                            `您确定要出售 <strong>${aircraftName}</strong> 吗？<br>
+                             出售价格：¥${sellPrice.toLocaleString()}`;
+                        document.getElementById('sellModal').style.display = 'block';
+                    }
+                });
+        }
+        
+        // 确认出售
+        document.getElementById('confirmSell').addEventListener('click', function() {
+            if (sellAircraftId) {
+                fetch('/sell_aircraft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        aircraft_id: sellAircraftId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+            }
+        });
+        
+        // 取消出售
+        document.getElementById('cancelSell').addEventListener('click', function() {
+            document.getElementById('sellModal').style.display = 'none';
+            sellAircraftId = null;
+            sellAircraftName = null;
+        });
+        
+        // 关闭模态框
+        document.querySelector('#sellModal .close').addEventListener('click', function() {
+            document.getElementById('sellModal').style.display = 'none';
+            sellAircraftId = null;
+            sellAircraftName = null;
+        });
+        
+        // 点击外部关闭
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('sellModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                sellAircraftId = null;
+                sellAircraftName = null;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员面板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1>航司模拟经营 - 管理员面板</h1>
+            <ul>
+                <li><a href="{{ url_for('main') }}">主页</a></li>
+                <li><a href="{{ url_for('flight_operations') }}">航班运营</a></li>
+                <li><a href="{{ url_for('buy_aircraft') }}">购买飞机</a></li>
+                <li><a href="{{ url_for('profile') }}">个人中心</a></li>
+                <li><a href="{{ url_for('admin_panel') }}">管理员面板</a></li>
+                <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h2>用户管理</h2>
+        
+        <div class="users-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>航司名称</th>
+                        <th>金钱</th>
+                        <th>安全值</th>
+                        <th>舒适度</th>
+                        <th>权限</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user[0] }}</td>
+                        <td>{{ user[1] }}</td>
+                        <td>{{ user[2] }}</td>
+                        <td>
+                            <input type="number" id="money-{{ user[0] }}" value="{{ user[3] }}" step="1000000">
+                        </td>
+                        <td>
+                            <input type="number" id="safety-{{ user[0] }}" value="{{ user[4] }}" min="0" max="10" step="0.1">
+                        </td>
+                        <td>
+                            <input type="number" id="comfort-{{ user[0] }}" value="{{ user[5] }}" min="0" max="10" step="0.1">
+                        </td>
+                        <td>
+                            <select id="role-{{ user[0] }}">
+                                <option value="user" {% if user[6] == 'user' %}selected{% endif %}>普通用户</option>
+                                <option value="admin" {% if user[6] == 'admin' %}selected{% endif %}>管理员</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button onclick="updateUser({{ user[0] }})">更新</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        function updateUser(userId) {
+            const money = document.getElementById(`money-${userId}`).value;
+            const safety = document.getElementById(`safety-${userId}`).value;
+            const comfort = document.getElementById(`comfort-${userId}`).value;
+            const role = document.getElementById(`role-${userId}`).value;
+            
+            fetch('/update_user_status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    money: money,
+                    safety: safety,
+                    comfort: comfort,
+                    role: role
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
